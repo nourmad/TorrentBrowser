@@ -31,7 +31,10 @@ const client = new WebTorrent({
 });
 
 // Configure streaming settings
-const STREAM_CACHE_SIZE = 60 * 1024 * 1024; // Cache approximately 60MB (roughly 1 minute of HD video)
+const STREAM_CACHE_SIZE = 350 * 1024 * 1024; // Cache approximately 350MB of video
+const PIECE_BUFFER_SIZE = 50; // Number of pieces to prioritize ahead of playback
+const MAX_CONNECTIONS = 40; // Increase connections for better streaming
+const MIN_PEERS = 10; // Minimum peer connections before we start playing
 
 // Middleware
 app.use(express.json());
@@ -71,21 +74,34 @@ app.post('/api/torrent', (req, res) => {
         path: `/stream/${existingTorrent.infoHash}/${encodeURIComponent(file.path)}`
       })),
       progress: existingTorrent.progress,
-      streamingOnly: true
+      streamingOnly: true,
+      peers: existingTorrent.numPeers,
+      downloadSpeed: existingTorrent.downloadSpeed,
+      timeRemaining: existingTorrent.timeRemaining
     });
   }
 
   try {
     // Add the torrent with streaming options
     client.add(magnetLink, { 
-      maxWebConns: 20,         // Increase connections for better streaming
-      strategy: 'sequential',  // Sequential download for streaming
-      streamingOnly: true      // Custom flag for our app
+      maxWebConns: MAX_CONNECTIONS, // Increase connections for better streaming
+      strategy: 'sequential',       // Sequential download for streaming
+      streamingOnly: true           // Custom flag for our app
     }, (torrent) => {
       // Manage the torrent pieces to prioritize current viewing position
       torrent.on('download', () => {
         // Log download progress
-        console.log(`Streaming progress: ${(torrent.progress * 100).toFixed(1)}%`);
+        console.log(`Streaming progress: ${(torrent.progress * 100).toFixed(1)}%, Speed: ${formatBytes(torrent.downloadSpeed)}/s, Peers: ${torrent.numPeers}`);
+      });
+
+      // Setup wire (peer) connection handlers
+      torrent.on('wire', (wire) => {
+        console.log(`Connected to peer with address: ${wire.remoteAddress}`);
+        wire.setTimeout(30000); // 30 second timeout
+        wire.on('timeout', () => {
+          console.log('Peer timed out');
+          wire.destroy();
+        });
       });
 
       // Send back torrent info
@@ -97,7 +113,10 @@ app.post('/api/torrent', (req, res) => {
           path: `/stream/${torrent.infoHash}/${encodeURIComponent(file.path)}`
         })),
         progress: torrent.progress,
-        streamingOnly: true
+        streamingOnly: true,
+        peers: torrent.numPeers,
+        downloadSpeed: torrent.downloadSpeed,
+        timeRemaining: torrent.timeRemaining
       });
     });
   } catch (error) {
@@ -108,6 +127,24 @@ app.post('/api/torrent', (req, res) => {
   // Handle client errors
   client.on('error', err => {
     console.error('WebTorrent client error:', err.message);
+  });
+});
+
+// Get torrent status update endpoint
+app.get('/api/torrent/:infoHash/status', (req, res) => {
+  const { infoHash } = req.params;
+  const torrent = client.torrents.find(t => t.infoHash === infoHash);
+  
+  if (!torrent) {
+    return res.status(404).json({ error: 'Torrent not found' });
+  }
+  
+  res.json({
+    progress: torrent.progress,
+    downloadSpeed: torrent.downloadSpeed,
+    numPeers: torrent.numPeers,
+    timeRemaining: torrent.timeRemaining,
+    ready: torrent.ready
   });
 });
 
@@ -131,13 +168,23 @@ app.get('/stream/:infoHash/:filePath', (req, res) => {
   const mimeType = getMimeType(file.name);
   res.setHeader('Content-Type', mimeType);
 
+  // Set streaming-specific headers
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('X-Streaming-Mode', 'memory-only');
+
   // Handle range requests for video streaming
   const range = req.headers.range;
   if (range) {
     const positions = range.replace(/bytes=/, '').split('-');
     const start = parseInt(positions[0], 10);
     const fileSize = file.length;
-    const end = positions[1] ? parseInt(positions[1], 10) : Math.min(start + STREAM_CACHE_SIZE, fileSize - 1);
+    
+    // Use a larger chunk size for range requests to reduce requests
+    const end = positions[1] 
+      ? parseInt(positions[1], 10) 
+      : Math.min(start + Math.floor(STREAM_CACHE_SIZE / 3), fileSize - 1);
+      
     const chunkSize = (end - start) + 1;
 
     res.writeHead(206, {
@@ -148,31 +195,58 @@ app.get('/stream/:infoHash/:filePath', (req, res) => {
       'Cache-Control': 'no-store' // Prevent browser from storing the entire file
     });
 
-    // Prioritize pieces near the requested range
+    // Advanced piece prioritization
     const pieceLength = torrent.pieceLength;
     const startPiece = Math.floor(start / pieceLength);
     const endPiece = Math.ceil(end / pieceLength);
     
-    // Prioritize the immediate pieces
-    const piecesToPrioritize = 20; // Number of pieces to prioritize
-    for (let i = 0; i < piecesToPrioritize; i++) {
+    // Aggressively prioritize immediate pieces and gradually decrease priority for further pieces
+    for (let i = 0; i < PIECE_BUFFER_SIZE; i++) {
       const pieceIndex = startPiece + i;
-      if (pieceIndex <= endPiece && pieceIndex < torrent.pieces.length) {
-        torrent.select(pieceIndex, pieceIndex + 1, 1); // Priority 1
+      
+      if (pieceIndex < torrent.pieces.length) {
+        if (i < 10) {
+          // Critical pieces (next 10 pieces) - highest priority
+          torrent.select(pieceIndex, pieceIndex + 1, 10);
+        } else if (i < 20) {
+          // High priority for next 10 pieces
+          torrent.select(pieceIndex, pieceIndex + 1, 5);
+        } else {
+          // Normal priority for further pieces
+          torrent.select(pieceIndex, pieceIndex + 1, 1);
+        }
       }
+    }
+
+    // Deselect pieces far in the buffer to focus resources
+    const deselectionPoint = startPiece + PIECE_BUFFER_SIZE + 30;
+    if (deselectionPoint < torrent.pieces.length) {
+      torrent.deselect(deselectionPoint, torrent.pieces.length, 0);
     }
 
     // Stream the data
     const stream = file.createReadStream({ start, end });
     stream.pipe(res);
+    
+    // Handle stream errors
+    stream.on('error', (err) => {
+      console.error('Stream error:', err);
+      res.end();
+    });
   } else {
     // For non-range requests, still limit cache size
-    res.setHeader('Content-Length', Math.min(file.length, STREAM_CACHE_SIZE));
-    res.setHeader('Cache-Control', 'no-store');
+    const initialChunkSize = Math.min(file.length, STREAM_CACHE_SIZE / 2);
+    res.setHeader('Content-Length', initialChunkSize);
     
     // Start streaming from beginning with cache limit
-    const stream = file.createReadStream({ start: 0, end: STREAM_CACHE_SIZE - 1 });
+    const stream = file.createReadStream({ start: 0, end: initialChunkSize - 1 });
     stream.pipe(res);
+    
+    // Handle stream errors
+    stream.on('error', (err) => {
+      console.error('Stream error:', err);
+      res.end();
+    });
   }
 });
 
@@ -183,16 +257,42 @@ function getMimeType(filename) {
     '.mp4': 'video/mp4',
     '.webm': 'video/webm',
     '.ogg': 'video/ogg',
+    '.mov': 'video/quicktime',
+    '.mkv': 'video/x-matroska',
+    '.avi': 'video/x-msvideo',
     '.mp3': 'audio/mpeg',
     '.wav': 'audio/wav',
+    '.flac': 'audio/flac',
+    '.aac': 'audio/aac',
     '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
     '.png': 'image/png',
+    '.gif': 'image/gif',
     '.pdf': 'application/pdf',
-    '.txt': 'text/plain'
+    '.txt': 'text/plain',
+    '.srt': 'text/plain',
+    '.vtt': 'text/vtt',
+    '.json': 'application/json',
+    '.xml': 'application/xml',
+    '.html': 'text/html',
+    '.css': 'text/css',
+    '.js': 'application/javascript'
   };
   
   return types[ext] || 'application/octet-stream';
+}
+
+// Utility function to format bytes
+function formatBytes(bytes, decimals = 2) {
+  if (bytes === 0) return '0 Bytes';
+  
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
 // Always serve the React app for client-side routing
