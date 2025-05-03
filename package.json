@@ -1,0 +1,25 @@
+{
+  "name": "streamtorrents",
+  "version": "1.0.0",
+  "description": "Stream torrents in browser",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "server": "nodemon --experimental-json-modules server.js",
+    "client": "npm run start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "cd client && npm run build"
+  },
+  "keywords": ["torrent", "streaming", "webtorrent"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "webtorrent": "^2.1.35"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.3"
+  }
+}
