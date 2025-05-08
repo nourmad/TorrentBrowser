@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import WebTorrent from 'webtorrent';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Form, Button, Alert, Card, ListGroup, Spinner, Badge, ProgressBar, Tooltip, OverlayTrigger, ButtonGroup, Collapse } from 'react-bootstrap';
-import { FaSun, FaMoon, FaCloudDownloadAlt, FaFileVideo, FaFileAudio, FaFileAlt, FaInfoCircle, FaFileCode, FaStream, FaNetworkWired, FaTachometerAlt, FaPlay, FaPause, FaForward, FaBackward, FaImage, FaEye, FaEyeSlash, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaSun, FaMoon, FaFileVideo, FaFileAudio, FaFileAlt, FaInfoCircle, FaFileCode, FaStream, FaNetworkWired, FaTachometerAlt, FaPlay, FaPause, FaForward, FaBackward, FaImage, FaEye, FaEyeSlash } from 'react-icons/fa';
 import './App.css';
-import './process-polyfill.js'; // Import process polyfill
 
 function App() {
   const [magnetLink, setMagnetLink] = useState('');
@@ -14,11 +12,11 @@ function App() {
   const [torrentInfo, setTorrentInfo] = useState(null);
   const [currentFile, setCurrentFile] = useState(null);
   const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
-  const [textContent, setTextContent] = useState('');
-  const [textLoading, setTextLoading] = useState(false);
+  const [, setTextContent] = useState('');
+  const [, setTextLoading] = useState(false);
   const [downloadSpeed, setDownloadSpeed] = useState(0);
   const [peerCount, setPeerCount] = useState(0);
-  const [lastPlaybackPosition, setLastPlaybackPosition] = useState(0);
+  const [, setLastPlaybackPosition] = useState(0);
   const [statusPollingActive, setStatusPollingActive] = useState(false);
   const [expandedFiles, setExpandedFiles] = useState({});
   const [filePreviewContent, setFilePreviewContent] = useState({});
@@ -202,7 +200,7 @@ function App() {
         clearInterval(statusIntervalRef.current);
       }
     };
-  }, [statusPollingActive, torrentRef.current]);
+  }, [statusPollingActive]);
 
   // Cleanup on component unmount
   useEffect(() => {
@@ -536,11 +534,6 @@ function App() {
     console.log('Media type:', { isVideoFile, isAudioFile });
 
     if (isVideoFile) {
-      // Create blob URL for the file
-      const fileStream = currentFile.fileObject.createReadStream();
-      const mediaSource = new MediaSource();
-      const videoURL = URL.createObjectURL(mediaSource);
-
       return (
         <div className="position-relative">
           {videoError ? (

@@ -2,16 +2,23 @@ const webpack = require('webpack');
 const path = require('path');
 
 module.exports = function override(config, env) {
-  // Add fallbacks for node modules
+  // Add fallbacks for Node.js core modules
   config.resolve.fallback = {
     ...config.resolve.fallback,
-    path: require.resolve('path-browserify'),
-    stream: require.resolve('stream-browserify'),
-    crypto: require.resolve('crypto-browserify'),
-    buffer: require.resolve('buffer'),
-    os: require.resolve('os-browserify/browser'),
-    process: require.resolve('process/browser'),
-    vm: require.resolve('vm-browserify')
+    "crypto": require.resolve("crypto-browserify"),
+    "stream": require.resolve("stream-browserify"),
+    "path": require.resolve("path-browserify"),
+    "os": require.resolve("os-browserify/browser"),
+    "buffer": require.resolve("buffer/"),
+    "fs": false,
+    "http": false,
+    "https": false,
+    "net": false,
+    "tls": false,
+    "zlib": false,
+    "dgram": false,
+    "dns": false,
+    "child_process": false,
   };
 
   // Add alias for process/browser to fix WebTorrent issue
@@ -38,18 +45,17 @@ module.exports = function override(config, env) {
     ]
   };
 
-  // Add plugins for polyfills
-  config.plugins = [
-    ...config.plugins,
+  // Enable WebTorrent's Buffer usage
+  config.plugins = (config.plugins || []).concat([
     new webpack.ProvidePlugin({
+      process: 'process/browser',
       Buffer: ['buffer', 'Buffer'],
-      process: 'process/browser'
     }),
     // Define process.env.NODE_ENV
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(env === 'production' ? 'production' : 'development')
     })
-  ];
+  ]);
 
   return config;
 }; 

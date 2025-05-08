@@ -1,7 +1,5 @@
 // Import polyfills first
-import './process-polyfill.js';
-import './polyfills/webtorrent-fix';
-import './webtorrentFix';
+import './polyfills.js';
 
 // Standard React imports
 import React from 'react';
@@ -9,23 +7,6 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { Buffer } from 'buffer';
-
-// Ensure process and Buffer are available globally
-if (typeof window.process === 'undefined') {
-  window.process = {
-    browser: true,
-    env: { NODE_ENV: process.env.NODE_ENV || 'production' },
-    nextTick: (fn) => setTimeout(fn, 0),
-    title: 'browser',
-    version: '',
-    versions: {}
-  };
-}
-
-if (typeof window.Buffer === 'undefined') {
-  window.Buffer = Buffer;
-}
 
 // Ensure dark mode is applied before initial render
 // This works with the script in index.html to prevent any flash of white content
