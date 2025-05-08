@@ -1,0 +1,300 @@
+body {
+  background-color: var(--bg-primary);
+  transition: all var(--transition-speed) ease;
+}
+
+.container {
+  max-width: 1200px;
+}
+
+.card {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+  box-shadow: var(--shadow);
+  transition: all var(--transition-speed) ease;
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.list-group-item {
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.list-group-item:hover {
+  background-color: var(--bg-secondary);
+}
+
+.list-group-item.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #ffffff;
+}
+
+.form-control {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 0.25rem rgba(98, 0, 238, 0.25);
+}
+
+.form-control::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.form-label {
+  color: var(--text-primary);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+.form-text {
+  color: var(--text-secondary);
+}
+
+footer {
+  padding: 1.5rem 0;
+  color: var(--text-secondary);
+}
+
+.theme-toggle {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+}
+
+.theme-toggle:hover {
+  transform: rotate(30deg);
+}
+
+/* Custom styling for the media player */
+video, audio {
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.alert {
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.alert-info {
+  background-color: rgba(3, 218, 198, 0.1);
+  border-color: var(--secondary-color);
+  color: var(--text-primary);
+}
+
+.alert-danger {
+  background-color: rgba(207, 102, 121, 0.1);
+  border-color: var(--danger-color);
+  color: var(--text-primary);
+}
+
+/* App title styling */
+.app-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1.5rem;
+}
+
+/* Progress styling */
+.progress {
+  height: 8px;
+  background-color: var(--bg-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  background-color: var(--primary-color);
+}
+
+/* File list hover effect */
+.file-item {
+  transition: all 0.3s ease;
+}
+
+.file-item:hover {
+  transform: translateX(5px);
+}
+
+/* Video player controls */
+.video-controls {
+  padding: 10px 0;
+  border-radius: 8px;
+  margin-top: 10px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.video-controls .btn-group {
+  margin: 0 auto;
+}
+
+.video-controls .btn-group .btn {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.video-controls .btn-group .btn:hover {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.video-controls .btn-group .btn.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+/* Streaming stats badges */
+.stream-stats {
+  margin-top: 0.75rem;
+}
+
+.stream-quality-badge {
+  padding: 0.5rem 0.75rem;
+  font-weight: 500;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Streaming badge styling */
+.badge-streaming {
+  background-color: var(--secondary-color);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+}
+
+/* Make video element more prominent */
+video {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Dark mode changes */
+[data-theme="dark"] video {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive adjustments for controls */
+@media (max-width: 768px) {
+  .video-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .video-controls > div {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .stream-stats {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+  }
+}
+
+/* Add hover effect to video */
+.position-relative:hover video {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+/* Add CSS variables for light/dark mode */
+:root {
+  --primary-color: #6200ee;
+  --primary-hover: #5000c9;
+  --secondary-color: #03dac6;
+  --danger-color: #cf6679;
+  
+  --bg-primary: #f5f5f5;
+  --bg-secondary: #ffffff;
+  --card-bg: #ffffff;
+  
+  --text-primary: #121212;
+  --text-secondary: #666666;
+  
+  --border-color: #e5e5e5;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  
+  --transition-speed: 0.3s;
+}
+
+/* Dark mode variables */
+[data-theme="dark"] {
+  --primary-color: #bb86fc;
+  --primary-hover: #9d4edd;
+  --secondary-color: #03dac6;
+  --danger-color: #cf6679;
+  
+  --bg-primary: #121212;
+  --bg-secondary: #2d2d2d;
+  --card-bg: #1e1e1e;
+  
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  
+  --border-color: #333333;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
