@@ -1,0 +1,25 @@
+diff --git a/node_modules/webtorrent/lib/file-stream.js b/node_modules/webtorrent/lib/file-stream.js
+index 5aecd75..9b7df7e 100644
+--- a/node_modules/webtorrent/lib/file-stream.js
++++ b/node_modules/webtorrent/lib/file-stream.js
+@@ -1,6 +1,6 @@
+ const debug = require('debug')('webtorrent:file-stream')
+ const { Readable } = require('readable-stream')
+-const process = require('process/browser')
++const process = window.process || require('process')
+ 
+ /**
+  * Readable stream of a torrent file
+diff --git a/node_modules/webtorrent/lib/file.js b/node_modules/webtorrent/lib/file.js
+index 9a14d51..8a4fdee 100644
+--- a/node_modules/webtorrent/lib/file.js
++++ b/node_modules/webtorrent/lib/file.js
+@@ -1,7 +1,7 @@
+ const debug = require('debug')('webtorrent:file')
+ const EventEmitter = require('events').EventEmitter
+ const fs = require('fs')
+-const process = require('process/browser')
++const process = window.process || require('process')
+ const { Readable } = require('readable-stream')
+ const path = require('path')
+ const { Readable: NodeReadable } = require('stream') 

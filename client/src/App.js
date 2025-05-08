@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Form, Button, Alert, Card, ListGroup, Spinner, Badge, ProgressBar, Tooltip, OverlayTrigger, ButtonGroup, Collapse } from 'react-bootstrap';
 import { FaSun, FaMoon, FaCloudDownloadAlt, FaFileVideo, FaFileAudio, FaFileAlt, FaInfoCircle, FaFileCode, FaStream, FaNetworkWired, FaTachometerAlt, FaPlay, FaPause, FaForward, FaBackward, FaImage, FaEye, FaEyeSlash, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import './App.css';
+import './process-polyfill.js'; // Import process polyfill
 
 function App() {
   const [magnetLink, setMagnetLink] = useState('');

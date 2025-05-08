@@ -11,6 +11,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.9.0",
     "bootstrap": "^5.3.5",
+    "browser-process-hrtime": "^1.0.0",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.1",
     "os-browserify": "^0.3.0",
@@ -28,10 +29,12 @@
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
+    "build:github": "cross-env REACT_APP_NODE_ENV=production react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build -r https://github.com/nourmad/TorrentBrowser.git"
+    "predeploy": "npm run build:github",
+    "deploy": "gh-pages -d build -r https://github.com/nourmad/TorrentBrowser.git",
+    "postinstall": "patch-package"
   },
   "eslintConfig": {
     "extends": [
@@ -53,6 +56,11 @@
   },
   "proxy": "http://localhost:5000",
   "devDependencies": {
-    "process": "^0.11.10"
+    "assert": "^2.1.0",
+    "cross-env": "^7.0.3",
+    "patch-package": "^8.0.0",
+    "process": "^0.11.10",
+    "process-nextick-args": "^2.0.1",
+    "util": "^0.12.5"
   }
 }

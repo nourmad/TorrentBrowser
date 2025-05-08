@@ -1,4 +1,12 @@
-// Import polyfills first, before any other imports
+// Import polyfills first
+import './process-polyfill.js';
+import './polyfills/webtorrent-fix';
+
+// Apply WebTorrent patches
+import { applyWebTorrentPatches } from './patches/webtorrent-patch';
+applyWebTorrentPatches();
+
+// Then other polyfills
 import './webtorrentFix';
 
 import React from 'react';
@@ -7,10 +15,11 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Buffer } from 'buffer';
-import process from 'process';
 
-window.Buffer = Buffer;
-window.process = process;
+// Additional safety measures
+if (!window.Buffer) {
+  window.Buffer = Buffer;
+}
 
 // Ensure dark mode is applied before initial render
 // This works with the script in index.html to prevent any flash of white content
