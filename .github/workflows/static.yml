@@ -61,11 +61,11 @@ jobs:
         if: steps.check-dirs.outputs.client_exists == 'true'
         run: |
           cd client
-          npm ci
+          npm install
       
       - name: Install dependencies (root folder)
         if: steps.check-dirs.outputs.client_exists != 'true'
-        run: npm ci
+        run: npm install
       
       - name: Build (client folder)
         if: steps.check-dirs.outputs.client_exists == 'true'
