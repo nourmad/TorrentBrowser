@@ -1,8 +1,16 @@
+// Import polyfills first, before any other imports
+import './webtorrentFix';
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { Buffer } from 'buffer';
+import process from 'process';
+
+window.Buffer = Buffer;
+window.process = process;
 
 // Ensure dark mode is applied before initial render
 // This works with the script in index.html to prevent any flash of white content
