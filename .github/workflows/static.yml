@@ -31,26 +31,60 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
+      - name: Check directory structure
+        id: check-dirs
+        run: |
+          echo "Repository contents:"
+          ls -la
+          
+          # Check if client directory exists
+          if [ -d "client" ]; then
+            echo "client_exists=true" >> $GITHUB_OUTPUT
+            echo "Client directory found. Will build from client folder."
+          elif [ -d "src" ] && [ -f "package.json" ]; then
+            echo "client_exists=false" >> $GITHUB_OUTPUT
+            echo "No client directory, but found React app at root level."
+          else
+            echo "::error::No valid React app structure found"
+            exit 1
+          fi
+      
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: 'npm'
-      - name: Install dependencies
+          cache-dependency-path: ${{ steps.check-dirs.outputs.client_exists == 'true' && 'client/package-lock.json' || 'package-lock.json' }}
+      
+      - name: Install dependencies (client folder)
+        if: steps.check-dirs.outputs.client_exists == 'true'
         run: |
           cd client
           npm ci
-      - name: Build
+      
+      - name: Install dependencies (root folder)
+        if: steps.check-dirs.outputs.client_exists != 'true'
+        run: npm ci
+      
+      - name: Build (client folder)
+        if: steps.check-dirs.outputs.client_exists == 'true'
         run: |
           cd client
           npm run build
+      
+      - name: Build (root folder)
+        if: steps.check-dirs.outputs.client_exists != 'true'
+        run: npm run build
+      
       - name: Setup Pages
         uses: actions/configure-pages@v4
+      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload the build directory of your client React app
-          path: './client/build'
+          path: ${{ steps.check-dirs.outputs.client_exists == 'true' && './client/build' || './build' }}
+          
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4  
