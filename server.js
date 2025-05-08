@@ -54,6 +54,15 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// API status endpoint for health checking
+app.get('/api/status', (req, res) => {
+  res.json({ 
+    status: 'online',
+    torrents: client.torrents.length,
+    systemMemory: process.memoryUsage()
+  });
+});
+
 // API endpoint to handle magnet links
 app.post('/api/torrent', (req, res) => {
   const { magnetLink } = req.body;
@@ -294,6 +303,27 @@ function formatBytes(bytes, decimals = 2) {
   
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
+
+// API endpoint to remove a specific torrent
+app.delete('/api/torrent/:infoHash', (req, res) => {
+  const { infoHash } = req.params;
+  const torrent = client.torrents.find(t => t.infoHash === infoHash);
+  
+  if (!torrent) {
+    return res.status(404).json({ error: 'Torrent not found' });
+  }
+  
+  // Remove the torrent from the client
+  client.remove(torrent.infoHash, (err) => {
+    if (err) {
+      console.error('Error removing torrent:', err);
+      return res.status(500).json({ error: 'Failed to remove torrent' });
+    }
+    
+    console.log(`Torrent ${infoHash} removed successfully`);
+    res.json({ success: true, message: 'Torrent removed successfully' });
+  });
+});
 
 // Always serve the React app for client-side routing
 app.get('*', (req, res) => {
