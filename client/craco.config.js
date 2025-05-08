@@ -1,4 +1,5 @@
 const webpack = require('webpack');
+const path = require('path');
 
 module.exports = {
   webpack: {
@@ -13,12 +14,29 @@ module.exports = {
           process: require.resolve('process/browser'),
           util: require.resolve('util/'),
           assert: require.resolve('assert/'),
+          vm: require.resolve('vm-browserify'),
           fs: false,
           net: false,
           tls: false,
           child_process: false
         },
+        alias: {
+          'process/browser': path.resolve(__dirname, 'src/process/browser.js')
+        }
       },
+      module: {
+        rules: [
+          {
+            test: /node_modules\/webtorrent\/.*\.js$/,
+            loader: 'string-replace-loader',
+            options: {
+              search: "require\\(['\"]process/browser['\"]\\)",
+              replace: 'window.process || require("process")',
+              flags: 'g'
+            }
+          }
+        ]
+      }
     },
     plugins: {
       add: [

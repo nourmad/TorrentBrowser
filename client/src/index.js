@@ -1,14 +1,9 @@
 // Import polyfills first
 import './process-polyfill.js';
 import './polyfills/webtorrent-fix';
-
-// Apply WebTorrent patches
-import { applyWebTorrentPatches } from './patches/webtorrent-patch';
-applyWebTorrentPatches();
-
-// Then other polyfills
 import './webtorrentFix';
 
+// Standard React imports
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
@@ -16,8 +11,19 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Buffer } from 'buffer';
 
-// Additional safety measures
-if (!window.Buffer) {
+// Ensure process and Buffer are available globally
+if (typeof window.process === 'undefined') {
+  window.process = {
+    browser: true,
+    env: { NODE_ENV: process.env.NODE_ENV || 'production' },
+    nextTick: (fn) => setTimeout(fn, 0),
+    title: 'browser',
+    version: '',
+    versions: {}
+  };
+}
+
+if (typeof window.Buffer === 'undefined') {
   window.Buffer = Buffer;
 }
 

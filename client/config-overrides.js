@@ -10,13 +10,32 @@ module.exports = function override(config, env) {
     crypto: require.resolve('crypto-browserify'),
     buffer: require.resolve('buffer'),
     os: require.resolve('os-browserify/browser'),
-    process: require.resolve('process/browser')
+    process: require.resolve('process/browser'),
+    vm: require.resolve('vm-browserify')
   };
 
   // Add alias for process/browser to fix WebTorrent issue
+  // Use our custom implementation
   config.resolve.alias = {
     ...config.resolve.alias,
-    'process/browser': require.resolve('process/browser')
+    'process/browser': path.resolve(__dirname, 'src/process/browser.js')
+  };
+
+  // Enforce specific file extension for process/browser
+  config.module = {
+    ...config.module,
+    rules: [
+      ...(config.module?.rules || []),
+      {
+        test: /node_modules\/webtorrent\/.*\.js$/,
+        loader: 'string-replace-loader',
+        options: {
+          search: "require\\(['\"]process/browser['\"]\\)",
+          replace: 'window.process || require("process")',
+          flags: 'g'
+        }
+      }
+    ]
   };
 
   // Add plugins for polyfills

@@ -33,8 +33,7 @@
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build:github",
-    "deploy": "gh-pages -d build -r https://github.com/nourmad/TorrentBrowser.git",
-    "postinstall": "patch-package"
+    "deploy": "gh-pages -d build -r https://github.com/nourmad/TorrentBrowser.git"
   },
   "eslintConfig": {
     "extends": [
@@ -58,9 +57,10 @@
   "devDependencies": {
     "assert": "^2.1.0",
     "cross-env": "^7.0.3",
-    "patch-package": "^8.0.0",
     "process": "^0.11.10",
     "process-nextick-args": "^2.0.1",
-    "util": "^0.12.5"
+    "string-replace-loader": "^3.1.0",
+    "util": "^0.12.5",
+    "vm-browserify": "^1.1.2"
   }
 }
